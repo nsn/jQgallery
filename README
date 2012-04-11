@@ -1,0 +1,10 @@
+jQGallery is a simple jQuery plugin that displays picasa photos and web albums
+
+see example.html and jQGallery.js for help on how to use
+
+Changelog:
+
+v0.1 - initial release
+----------------------
+supports picasa photos, web albums and album teasers
+

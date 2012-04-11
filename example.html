@@ -1,0 +1,64 @@
+<!doctype html public>
+<html>
+<head>
+   <link rel="stylesheet" type="text/css" href="http://satansoft.de/fancybox/jquery.fancybox.css"></link>
+</head>
+<body>
+  <h1>jQGallery examples page</h1>
+  (all examples are carefully selected from my personal holiday pictures...)<br/>
+  jQGallery generally only supports public albums, but why not make them public if you are going to share them anyways?
+  <h2>single picasa photos</h2>
+  the <strong>picasaPhoto()</strong> function renders an image element that displays the thumbnail surrounded by an anchor tag that
+  links to the actual image.
+
+  <h3>single photo /w default values:</h3>
+  <pre>
+      $(".singlephotodefault").picasaPhoto();
+  </pre>
+  <div class="singlephotodefault" data-userid="108363071077152262865" data-albumid="5683888656794856785" data-photoid="5683889469063601058"></div>
+
+  <h3>single photo /w several options set:</h3>
+  please see jQGallery.js for possible options, also please note the use of the callback option to implement a fancybox gallery:
+  <pre>
+      $(".singlephotooptions").picasaPhoto({
+        "thumbsize" : "192c",
+        "imageMax"  : "640",
+        "callback" : function (element) {
+          $(element).fancybox();
+        } 
+      });
+  </pre>
+  <div class="singlephotooptions" data-userid="108363071077152262865" data-albumid="5683888656794856785" data-photoid="5683889484032671730"></div>
+
+  <!-- load jQuery and plugin scripts -->
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="http://satansoft.de/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="jQGallery.js"></script>
+  <!-- init script, would normally be in it's own file -->
+  <script type="text/javascript">
+    $(document).ready(function(){
+      // render single photos
+      // default
+      $(".singlephotodefault").picasaPhoto();
+      // passing some options
+      $(".singlephotooptions").picasaPhoto({
+        "thumbsize" : "192c",
+        "imageMax"  : "640",
+        "callback" : function (element) {
+          $(element).fancybox();
+        } 
+      });
+
+/*
+{
+        "linkRel" : "devscreens",
+        "callback" : function (element) {
+          $(element).fancybox();
+        }
+      });
+*/
+
+    });
+  </script>
+</body>
+</html>
