@@ -10,6 +10,7 @@
   <h2>TOC</h2>
   <ol>
     <li><a href="#c1">single photos</a></li>
+    <li><a href="#c2">whole albums</a></li>
   </ol>
 
   jQGallery generally only supports public albums, but why not make them public if you are going to share them anyways?<br/>
@@ -21,8 +22,12 @@
   surrounded by an anchor tag that links to the actual image.
 
   <h3><a name="c1.1"/>single photo /w default values:</h3>
-  Generally jQGallery uses <strong>data-*</strong> attributes to gather information about what photo to display, this makes for very
-  simple Javascript code when calling the plugin, while still providing a lot of flexibility:
+  jQGallery uses <strong>data-*</strong> attributes to gather information about what photo to display, this makes for very
+  simple Javascript code when calling the plugin, while still providing a lot of flexibility. The best way to find those IDs is
+  to click on the "RSS"-link in your picasa web albums pages, look for urls like this one:
+  <pre>
+    https://picasaweb.google.com/data/entry/base/user/108363071077152262865/albumid/5679796410312675457/photoid/5679796436624162050
+  </pre>
   <script src="https://gist.github.com/2365314.js"> </script>
   <div class="singlephotodefault" data-userid="108363071077152262865" data-albumid="5683888656794856785" data-photoid="5683889469063601058"></div>
 
@@ -32,8 +37,19 @@
   <div class="singlephotooptions" data-userid="108363071077152262865" data-albumid="5683888656794856785" data-photoid="5683889484032671730"></div>
 
   <!-- single photos section -->
-  <h2><a name="c2"/>whole albums</h2>
-  <div class="album" data-userid="108363071077152262865" data-albumid="5683888656794856785"></div>
+  <h2><a name="c2">whole albums</a></h2>
+  For albums you don't need to specify the data-photoid attribute. The <strong>picasaAlbum()</strong> function calls the callback function passed as 
+  a parameter in the options map once per album, passing the element it was called upon. Because of the way jQuery handles the calls on selector return
+  values we need to employ a little hack in order to be able to have a working fancybox()-gallery: we need to set a css-class on the anchor element
+  and then select elements with this class. Because fancybox uses the "rel" attribute to group images into galleries jQGallery will automagically chose
+  a rel that's unique for a picasa album.
+  <script src="https://gist.github.com/2366981.js"> </script>
+  <div class="album1" data-userid="108363071077152262865" data-albumid="5682777468479729649"></div>
+  This even works across multiple picasa albums:
+  <script src="https://gist.github.com/2366990.js"> </script>
+  <div class="album2" data-userid="108363071077152262865" data-albumid="5684490602047224481"></div>
+  <div class="album2" data-userid="108363071077152262865" data-albumid="5679796410312675457"></div>
+
 
   <!-- load jQuery and plugin scripts -->
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -54,16 +70,22 @@
         } 
       });
       // render whole albums
-      $(".album").picasaAlbum();
-
-/*
-{
-        "linkRel" : "devscreens",
-        "callback" : function (element) {
-          $(element).fancybox();
+      $(".album1").picasaAlbum({
+          "linkStyleClass" : "gallery1",
+          "callback" : function (elements) {
+            $(".gallery1").fancybox();
+          }
         }
-      });
-*/
+      );
+      $(".album2").picasaAlbum({
+          "linkStyleClass" : "gallery2",
+          "thumbsize" : "94c",
+          "callback" : function (elements) {
+            $(".gallery2").fancybox();
+          }
+        }
+      );
+      
 
     });
   </script>
