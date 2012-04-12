@@ -6,29 +6,34 @@
 <body>
   <h1>jQGallery examples page</h1>
   (all examples are carefully selected from my personal holiday pictures...)<br/>
-  jQGallery generally only supports public albums, but why not make them public if you are going to share them anyways?
-  <h2>single picasa photos</h2>
-  the <strong>picasaPhoto()</strong> function renders an image element that displays the thumbnail surrounded by an anchor tag that
-  links to the actual image.
 
-  <h3>single photo /w default values:</h3>
-  <pre>
-      $(".singlephotodefault").picasaPhoto();
-  </pre>
+  <h2>TOC</h2>
+  <ol>
+    <li><a href="#c1">single photos</a></li>
+  </ol>
+
+  jQGallery generally only supports public albums, but why not make them public if you are going to share them anyways?<br/>
+ 
+  <!-- single photos section -->
+  <h2><a name="c1"/>single picasa photos</h2>
+
+  the <strong>picasaPhoto()</strong> function renders adds an image to the current element that displays the photo thumbnail 
+  surrounded by an anchor tag that links to the actual image.
+
+  <h3><a name="c1.1"/>single photo /w default values:</h3>
+  Generally jQGallery uses <strong>data-*</strong> attributes to gather information about what photo to display, this makes for very
+  simple Javascript code when calling the plugin, while still providing a lot of flexibility:
+  <script src="https://gist.github.com/2365314.js"> </script>
   <div class="singlephotodefault" data-userid="108363071077152262865" data-albumid="5683888656794856785" data-photoid="5683889469063601058"></div>
 
-  <h3>single photo /w several options set:</h3>
+  <h3><a name="c1.2"/>single photo /w several options set:</h3>
   please see jQGallery.js for possible options, also please note the use of the callback option to implement a fancybox gallery:
-  <pre>
-      $(".singlephotooptions").picasaPhoto({
-        "thumbsize" : "192c",
-        "imageMax"  : "640",
-        "callback" : function (element) {
-          $(element).fancybox();
-        } 
-      });
-  </pre>
+  <script src="https://gist.github.com/2365389.js"> </script>
   <div class="singlephotooptions" data-userid="108363071077152262865" data-albumid="5683888656794856785" data-photoid="5683889484032671730"></div>
+
+  <!-- single photos section -->
+  <h2><a name="c2"/>whole albums</h2>
+  <div class="album" data-userid="108363071077152262865" data-albumid="5683888656794856785"></div>
 
   <!-- load jQuery and plugin scripts -->
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -48,6 +53,8 @@
           $(element).fancybox();
         } 
       });
+      // render whole albums
+      $(".album").picasaAlbum();
 
 /*
 {

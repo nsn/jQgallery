@@ -22,73 +22,88 @@
 
 */
 (function($) {
+
   $.fn.picasaPhoto = function(options) {
-
-    this.each(function() {
-      var $this = $(this);
-
-      var albumID = $this.attr("data-albumid");
-      var userID = $this.attr("data-userid");
-      var photoID = $this.attr("data-photoid");
-
-      if (albumID === undefined || userID === undefined || photoID === undefined)
-        return;
-
-
-      var dom = $($this);
-
-      /** default options */
-      var thumbsize = "220u";
-      var imageMax = "d";
-      var imageStyleClass = undefined;
-      var linkStyleClass = undefined;
-      var linkRel = undefined;
-      var callback = function(element) {};
-      if (options !== undefined) {
-        if (options.thumbsize !== undefined) 
-          thumbsize = options.thumbsize;
-        if (options.imageMax !== undefined) 
-          imageMax = options.imageMax;
-        if (options.imageStyleClass !== undefined)
-          imageStyleClass = options.imageStyleClass;
-        if (options.linkStyleClass !== undefined)
-          linkStyleClass = options.linkStyleClass
-        if (options.linkRel !== undefined)
-          linkRel = options.linkRel;
-        if (options.callback !== undefined)
-          callback = options.callback;
-      }
-
-      $.getJSON("https://picasaweb.google.com/data/feed/api/user/" + userID + "/albumid/" + albumID + "/photoid/" + photoID +"?access=public&alt=jsonc&imgmax=" + imageMax + "&thumbsize=" + thumbsize , 'callback=?',
-        function(data){
-
-          var photo = data.data;
-
-          var imgElement = $("<img/>");
-          imgElement.attr("alt", photo.title);
-          imgElement.attr("src", photo.media.thumbnails[0]);
-          if (imageStyleClass !== undefined)
-            imgElement.attr("class", options.imageStyleClass);
-
-
-          var aElement = $("<a/>");
-          aElement.attr("href", photo.media.image.url);
-          aElement.attr("alt", photo.title);
-          aElement.attr("title", photo.description);
-          if (linkStyleClass !== undefined)
-            aElement.attr("class", options.linkStyleClass);
-          if (linkRel !== undefined)
-            aElement.attr("rel", options.linkRel);
-          aElement.append(imgElement);
-
-          dom.append(aElement);
-
-          options.callback(aElement);
-        });
+    $(this).each(function() {
+      scope = $(this);
+      $.jQGallery.picasaPhoto(scope, options);
     });
   };
 
-}) (jQuery);
 
+  /** instance function */
+  $.jQGallery = { 
+
+    /** 
+     * single photo function 
+     * 
+     * scope: the scope to apply the method to (the element)
+     * options: an array filled with all necessary values
+     */
+    picasaPhoto : function(scope, options) {
+        var albumID = scope.attr("data-albumid");
+        var userID = scope.attr("data-userid");
+        var photoID = scope.attr("data-photoid");
+
+        if (albumID === undefined || userID === undefined || photoID === undefined)
+          return;
+
+        options = $.jQGallery.makeValidOptionsArray(options); 
+
+        var dom = $(scope);
+        $.getJSON("https://picasaweb.google.com/data/feed/api/user/" + userID + "/albumid/" + albumID + "/photoid/" + photoID 
+                + "?access=public&alt=jsonc&imgmax=" + options.imageMax + "&thumbsize=" + options.thumbsize , 'callback=?',
+          function(data){
+
+            var photo = data.data;
+
+            var imgElement = $("<img/>");
+            imgElement.attr("alt", photo.title);
+            imgElement.attr("src", photo.media.thumbnails[0]);
+            imgElement.attr("class", options.imageStyleClass);
+
+
+            var aElement = $("<a/>");
+            aElement.attr("href", photo.media.image.url);
+            aElement.attr("alt", photo.title);
+            aElement.attr("title", photo.description);
+            aElement.attr("class", options.linkStyleClass);
+            aElement.attr("rel", options.linkRel);
+            aElement.append(imgElement);
+
+            dom.append(aElement);
+
+            options.callback(aElement);
+          }
+        );
+    },
+
+    /**
+     * returns a valid options array, filled with values from param "options"
+     */
+    makeValidOptionsArray : function(options) {
+      if (options == undefined)
+        options = [];
+
+      if (options.thumbsize == undefined)
+        options.thumbsize = "220u";
+      if (options.imageMax == undefined) 
+        options.imageMax = "d";
+      if (options.imageStyleClass == undefined) 
+        options.imageStyleClass = "";
+      if (options.linkStyleClass == undefined) 
+        options.linkStyleClass = "";
+      if (options.linkRel == undefined) 
+        options.linkRel = "";
+      if (options.callback == undefined) 
+        options.callback = function(element) {};
+
+      return options;
+    },
+
+  };
+
+
+}) (jQuery);
 
 
