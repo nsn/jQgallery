@@ -171,7 +171,7 @@
             var title = album.title.$t;
             var photo = album.entry[0];
 
-            var aElement = $.jQGallery.makeAnchor(photo.content.src, options);
+            var aElement = $.jQGallery.makeAnchor(photo.content.src, title, title, options);
             var imgElement = $.jQGallery.makeImage(album.icon.$t, title, options);
             aElement.append(imgElement);
             dom.append(aElement);
@@ -179,7 +179,7 @@
             // image links
             for (var i=1; i<album.entry.length; i++) {
               photo = album.entry[i];
-              var aE = $.jQGallery.makeAnchor(photo.content.src, options);
+              var aE = $.jQGallery.makeAnchor(photo.content.src, photo.summary.$t, photo.title.$t, options);
               dom.append(aE);
             }
             options.callback(dom);
@@ -189,23 +189,22 @@
 
     makeAnchorElement : function(photo, options) {
         var imgElement = $.jQGallery.makeImage(photo.media.thumbnails[0], photo.title, options);
-        var aElement = $.jQGallery.makeAnchor(photo.media.image.url, options);
+        var aElement = $.jQGallery.makeAnchor(photo.media.image.url, photo.description, photo.title, options);
 
         aElement.append(imgElement);
-
-        if (photo.description)
-          aElement.attr("title", photo.description);
-        if (photo.title) 
-          aElement.attr("alt", photo.title);
 
         return aElement; 
     },
 
-    makeAnchor : function(href, options) {
+    makeAnchor : function(href, title, alt, options) {
         var aElement = $("<a/>");
         aElement.attr("href", href);
         aElement.attr("class", options.linkStyleClass);
         aElement.attr("rel", options.linkRel);
+        if (title)
+          aElement.attr("title", title);
+        if (alt) 
+          aElement.attr("alt", alt);
         return aElement;
     },
 
