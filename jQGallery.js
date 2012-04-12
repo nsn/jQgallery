@@ -85,7 +85,6 @@
         options = $.jQGallery.makeValidOptionsArray(options, albumID);
 
         var dom = $(scope);
-        var elements = [];
         $.getJSON("https://picasaweb.google.com/data/feed/api/user/" + userID + "/albumid/" + albumID  
                 + "?access=public&alt=jsonc&imgmax=" + options.imageMax + "&thumbsize=" + options.thumbsize , 'callback=?',
           function(data){
@@ -93,9 +92,8 @@
               var photo = data.data.items[index];
               var aElement = $.jQGallery.makeAnchorElement(photo, options);
               dom.append(aElement);
-              elements.push(aElement);
             }
-            options.callback(elements);
+            options.callback(dom);
           }
         );
     },
