@@ -60,6 +60,10 @@
   It renders an anchor element around the teaser image and also renders an empty anchor for each photo in that album:
   <script src="https://gist.github.com/2369009.js"> </script>
   <span class="teasergallery" data-userid="108363071077152262865" data-albumid="5684490602047224481"></span>
+<br/>
+foo
+  <span class="usergalleries" data-userid="108363071077152262865"></span>
+
 
   <!-- load jQuery and plugin scripts -->
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -97,7 +101,6 @@
       );
       // render album teasers
       $(".teaserimage").picasaTeaser();
-
       $(".teasergallery").picasaTeaserGallery({
           "linkStyleClass" : "gallery3",
           "callback" : function (elements) {
@@ -105,6 +108,14 @@
           }
         }
       );
+      $(".usergalleries").picasaUserGalleries({
+          "linkStyleClass" : "gallery4",
+          "callback" : function (elements) {
+            $(".gallery4").fancybox();
+          }
+        }
+      );
+
 
     });
   </script>

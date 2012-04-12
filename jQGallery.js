@@ -46,7 +46,26 @@
   $.fn.picasaTeaserGallery = function(options) {
     $(this).each(function() {
       scope = $(this);
-      $.jQGallery.picasaTeaserGallery(scope, options);
+      var albumID = scope.attr("data-albumid");
+      var userID = scope.attr("data-userid");
+
+      if (albumID === undefined || userID === undefined)
+        return;
+
+      options = $.jQGallery.makeValidOptionsArray(options, albumID);
+
+      $.jQGallery.foopicasaTeaserGallery(userID, albumID, scope, options);
+    });
+  };
+
+  $.fn.picasaUserGalleries = function(options) {
+    $(this).each(function() {
+      scope = $(this);
+      var userID = scope.attr("data-userid");
+      if (userID === undefined)
+        return;
+      options = $.jQGallery.makeValidOptionsArray(options, "foo");
+      $.jQGallery.picasaUserGalleries(userID, scope, options);
     });
   };
 
@@ -185,6 +204,86 @@
             options.callback(dom);
           }
         );
+    },
+
+    foopicasaTeaserGallery : function(userID, albumID, scope, options) {
+      var dom = $(scope);
+
+      $.getJSON($.jQGallery.makePicasaAlbumEntryURL(userID, albumID, options), 'callback=?',
+        function(data){
+          var album = data.data;
+          $.jQGallery.renderTeaserAnchor(album, dom, options);
+        }
+      );
+
+      $.getJSON($.jQGallery.makePicasaAlbumFeedURL(userID, albumID, options), 'callback=?',
+        function(data){
+          $.jQGallery.renderAlbumAnchors(data.data, dom, options);
+        }
+      );
+    },
+
+    picasaUserGalleries : function(userID, scope, options) {
+      var dom = $(scope);
+      $.getJSON($.jQGallery.makePicasaUserFeedURL(userID, options), 'callback=?',
+        function(data){
+          for (idx in data.data.items) {
+            var album = data.data.items[idx];
+            $.jQGallery.renderTeaserAnchor(album, dom, options);
+          }
+        }
+      );
+    },
+
+    renderAlbumAnchors : function(album, dom, options) {
+      for (idx in album.items) {
+        var photo = album.items[idx];
+        $.jQGallery.renderPhotoAnchor(photo, dom, true, options);
+      }
+    },
+
+    renderPhotoAnchor : function(photo, dom, hidden, options) {
+      var aElement = $.jQGallery.makeAnchor(photo.media.image.url, photo.description, photo.title, options);
+      if (!hidden) {
+        $.jQGallery.renderPhotoImage(photo, aElement, options);
+      }
+      dom.append(aElement);
+    },
+
+    renderPhotoImage : function(photo, dom, options) {
+      var imgElement = $.jQGallery.makeImage(photo.media.thumbnails[0], photo.description, options);
+      dom.append(imgElement);
+    },
+
+    renderTeaserAnchor : function(album, dom, options) {
+      var aElement = $.jQGallery.makeAnchor(album.media.image.url, album.title, album.title, options);
+      $.jQGallery.renderTeaserImage(album, aElement, options);
+      dom.append(aElement);
+    },
+
+    renderTeaserImage : function(album, dom, options) {
+      var imgElement = $.jQGallery.makeImage(album.media.thumbnails[0], album.title, options);
+      dom.append(imgElement);
+    },
+
+    makePicasaAlbumFeedURL : function(userID, albumID, options) {
+      return $.jQGallery.makePicasaBaseURL("feed", userID) + "/albumid/" + albumID + $.jQGallery.makePicasaQueryString(options);
+    },
+
+    makePicasaAlbumEntryURL : function(userID, albumID, options) {
+      return $.jQGallery.makePicasaBaseURL("entry", userID) + "/albumid/" + albumID + $.jQGallery.makePicasaQueryString(options);
+    },
+
+    makePicasaUserFeedURL : function(userID, options) {
+      return $.jQGallery.makePicasaBaseURL("feed", userID) + $.jQGallery.makePicasaQueryString(options);
+    },
+
+    makePicasaBaseURL : function(type, userID) {
+      return "https://picasaweb.google.com/data/" + type + "/api/user/" + userID;
+    },
+
+    makePicasaQueryString : function(options) {
+      return "?access=public&v=1&alt=jsonc&imgmax=" + options.imageMax + "&thumbsize=" + options.thumbsize;
     },
 
     makeAnchorElement : function(photo, options) {
