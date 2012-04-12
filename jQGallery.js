@@ -36,6 +36,20 @@
     });
   };
 
+  $.fn.picasaTeaser = function(options) {
+    $(this).each(function() {
+      scope = $(this);
+      $.jQGallery.picasaTeaser(scope, options);
+    });
+  };
+
+  $.fn.picasaTeaserGallery = function(options) {
+    $(this).each(function() {
+      scope = $(this);
+      $.jQGallery.picasaTeaserGallery(scope, options);
+    });
+  };
+
   /** instance function */
   $.jQGallery = { 
 
@@ -98,27 +112,111 @@
         );
     },
 
+    /** 
+     * album teaser function 
+     * 
+     * scope: the scope to apply the method to (the element)
+     * options: an array filled with all necessary values
+     */
+    picasaTeaser : function(scope, options) {
+        var albumID = scope.attr("data-albumid");
+        var userID = scope.attr("data-userid");
+
+        if (albumID === undefined || userID === undefined)
+          return;
+
+        options = $.jQGallery.makeValidOptionsArray(options, albumID);
+
+        var dom = $(scope);
+        $.getJSON("https://picasaweb.google.com/data/feed/api/user/" + userID + "/albumid/" + albumID  
+                + "?access=public&alt=json&imgmax=" + options.imageMax + "&thumbsize=" + options.thumbsize , 'callback=?',
+          function(data){
+            var album = data.feed;
+
+            if (!album)
+              return;
+
+            // teaser image
+            var title = album.title.$t;
+            var imgElement = $.jQGallery.makeImage(album.icon.$t, title, options);
+            dom.append(imgElement);
+
+            options.callback(dom);
+          }
+        );
+    },
+
+    /** 
+     * album teaser gallery function 
+     * 
+     * scope: the scope to apply the method to (the element)
+     * options: an array filled with all necessary values
+     */
+    picasaTeaserGallery : function(scope, options) {
+        var albumID = scope.attr("data-albumid");
+        var userID = scope.attr("data-userid");
+
+        if (albumID === undefined || userID === undefined)
+          return;
+
+        options = $.jQGallery.makeValidOptionsArray(options, albumID);
+
+        var dom = $(scope);
+        $.getJSON("https://picasaweb.google.com/data/feed/api/user/" + userID + "/albumid/" + albumID  
+                + "?access=public&alt=json&imgmax=" + options.imageMax + "&thumbsize=" + options.thumbsize , 'callback=?',
+          function(data){
+            var album = data.feed;
+
+            // teaser image
+            var title = album.title.$t;
+            var photo = album.entry[0];
+
+            var aElement = $.jQGallery.makeAnchor(photo.content.src, options);
+            var imgElement = $.jQGallery.makeImage(album.icon.$t, title, options);
+            aElement.append(imgElement);
+            dom.append(aElement);
+
+            // image links
+            for (var i=1; i<album.entry.length; i++) {
+              photo = album.entry[i];
+              var aE = $.jQGallery.makeAnchor(photo.content.src, options);
+              dom.append(aE);
+            }
+            options.callback(dom);
+          }
+        );
+    },
+
     makeAnchorElement : function(photo, options) {
-
-        var imgElement = $("<img/>");
-        imgElement.attr("src", photo.media.thumbnails[0]);
-        imgElement.attr("class", options.imageStyleClass);
-
-        var aElement = $("<a/>");
-        aElement.attr("href", photo.media.image.url);
-        aElement.attr("class", options.linkStyleClass);
-        aElement.attr("rel", options.linkRel);
+        var imgElement = $.jQGallery.makeImage(photo.media.thumbnails[0], photo.title, options);
+        var aElement = $.jQGallery.makeAnchor(photo.media.image.url, options);
 
         aElement.append(imgElement);
 
         if (photo.description)
           aElement.attr("title", photo.description);
-        if (photo.title) {
+        if (photo.title) 
           aElement.attr("alt", photo.title);
-          imgElement.attr("alt", photo.title);
-        }
 
         return aElement; 
+    },
+
+    makeAnchor : function(href, options) {
+        var aElement = $("<a/>");
+        aElement.attr("href", href);
+        aElement.attr("class", options.linkStyleClass);
+        aElement.attr("rel", options.linkRel);
+        return aElement;
+    },
+
+    makeImage : function(src, title, options) {
+        var imgElement = $("<img/>");
+        imgElement.attr("src", src);
+        imgElement.attr("class", options.imageStyleClass);
+        if (title)
+          imgElement.attr("alt", title);
+        
+        return imgElement;
     },
 
     /**
