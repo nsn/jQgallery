@@ -23,21 +23,14 @@
 
   */
   $.fn.picasaPhoto = function(options) {
-    $.jQGallery.call($.jQGallery.picasaPhoto, $(this), options);
+    $(this).each(function() {
+      $.jQGallery.call($.jQGallery.picasaPhoto, $(this), options);
+    });
   };
 
   $.fn.picasaAlbum = function(options) {
     $(this).each(function() {
-      scope = $(this);
-      var albumID = scope.attr("data-albumid");
-      var userID = scope.attr("data-userid");
-
-      if (albumID === undefined || userID === undefined)
-        return;
-
-      options = $.jQGallery.makeValidOptionsArray(options, albumID);
-
-      $.jQGallery.picasaAlbum(userID, albumID, scope, options);
+      $.jQGallery.call($.jQGallery.picasaAlbum, $(this), options);
     });
   };
 
@@ -95,25 +88,23 @@
       params.photoID = scope.attr("data-photoid");
 
       options = $.jQGallery.makeValidOptionsArray(options, params.albumID);
-  console.log("calling " + func + " params " + params.userID, params.albumID, params.photoID, options.linkStyleClass);
+//  console.log("calling " + func + " params " + params.userID, params.albumID, params.photoID, options);
       func(params, scope, options);
     },
 
-    //picasaPhoto : function(userID, albumID, photoID, scope, options) {
     picasaPhoto : function(params, scope, options) {
       var dom = $(scope);
-      console.log($.jQGallery.makePicasaPhotoFeedURL(params.userID, params.albumID, params.photoID, options));
       $.getJSON($.jQGallery.makePicasaPhotoEntryURL(params.userID, params.albumID, params.photoID, options), 'callback=?',
         function(data) {
-          $.jQGallery.renderPhotoAnchor(data.data, dom, false, options);
+          var anchor = $.jQGallery.renderPhotoAnchor(data.data, dom, false, options);
+          options.callback(anchor);
         }
       );
-      options.callback(dom);
     },
 
-    picasaAlbum : function(userID, albumID, scope, options) {
+    picasaAlbum : function(params, scope, options) {
       var dom = $(scope);
-      $.getJSON($.jQGallery.makePicasaAlbumFeedURL(userID, albumID, options), 'callback=?',
+      $.getJSON($.jQGallery.makePicasaAlbumFeedURL(params.userID, params.albumID, options), 'callback=?',
         function(data){
           $.jQGallery.renderAlbumAnchors(data.data, dom, false, options);
         }
@@ -185,6 +176,7 @@
         $.jQGallery.renderPhotoImage(photo, aElement, options);
       }
       dom.append(aElement);
+      return aElement;
     },
 
     renderPhotoImage : function(photo, dom, options) {

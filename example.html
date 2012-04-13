@@ -4,7 +4,6 @@
    <link rel="stylesheet" type="text/css" href="http://satansoft.de/fancybox/jquery.fancybox.css"></link>
 </head>
 <body>
-<!--
   <h1>jQGallery examples page</h1>
   (all examples are carefully selected from my personal holiday pictures...)<br/>
 
@@ -16,7 +15,6 @@
   </ol>
 
   jQGallery generally only supports public albums, but why not make them public if you are going to share them anyways?<br/>
---> 
   <!-- single photos section -->
   <h2><a name="c1">Picasa: single photos</a></h2>
 
@@ -39,7 +37,6 @@
   <div class="singlephotooptions" data-userid="108363071077152262865" data-albumid="5683888656794856785" data-photoid="5683889484032671730"></div>
 
   <!-- picasa albums section -->
-  <!--
   <h2><a name="c2">Picasa: whole albums</a></h2>
   For albums you don't need to specify the data-photoid attribute. The <strong>picasaAlbum()</strong> function calls the callback function passed as 
   a parameter in the options map once per album, passing the element it was called upon. Because of the way jQuery handles the calls on selector return
@@ -52,7 +49,6 @@
   <script src="https://gist.github.com/2366990.js"> </script>
   <div class="album2" data-userid="108363071077152262865" data-albumid="5684490602047224481"></div>
   <div class="album2" data-userid="108363071077152262865" data-albumid="5679796410312675457"></div>
--->
 
   <!-- picasa album teasers section -->
   <h2><a name="c2">Picasa: album teasers</a></h2>
@@ -83,8 +79,7 @@ foo
         "thumbsize" : "192c",
         "imageMax"  : "640",
         "callback" : function (element) {
-          console.log(element);
-          $(element).find("a").fancybox();
+          $(element).fancybox();
         } 
       });
       // render whole albums
