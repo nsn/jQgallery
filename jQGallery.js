@@ -32,14 +32,31 @@
   $.fn.picasaAlbum = function(options) {
     $(this).each(function() {
       scope = $(this);
-      $.jQGallery.picasaAlbum(scope, options);
+      //$.jQGallery.picasaAlbum(scope, options);
+      var albumID = scope.attr("data-albumid");
+      var userID = scope.attr("data-userid");
+
+      if (albumID === undefined || userID === undefined)
+        return;
+
+      options = $.jQGallery.makeValidOptionsArray(options, albumID);
+
+      $.jQGallery.picasaAlbum(userID, albumID, scope, options);
     });
   };
 
   $.fn.picasaTeaser = function(options) {
     $(this).each(function() {
       scope = $(this);
-      $.jQGallery.picasaTeaser(scope, options);
+      var albumID = scope.attr("data-albumid");
+      var userID = scope.attr("data-userid");
+
+      if (albumID === undefined || userID === undefined)
+        return;
+
+      options = $.jQGallery.makeValidOptionsArray(options, albumID);
+
+      $.jQGallery.picasaTeaser(userID, albumID, scope, options);
     });
   };
 
@@ -105,108 +122,25 @@
         );
     },
 
-    /** 
-     * album function 
-     * 
-     * scope: the scope to apply the method to (the element)
-     * options: an array filled with all necessary values
-     */
-    picasaAlbum : function(scope, options) {
-        var albumID = scope.attr("data-albumid");
-        var userID = scope.attr("data-userid");
+    picasaAlbum : function(userID, albumID, scope, options) {
+      var dom = $(scope);
+      $.getJSON($.jQGallery.makePicasaAlbumFeedURL(userID, albumID, options), 'callback=?',
+        function(data){
+          $.jQGallery.renderAlbumAnchors(data.data, dom, false, options);
+        }
+      );
+      options.callback(dom);
+    }, 
 
-        if (albumID === undefined || userID === undefined)
-          return;
+    picasaTeaser : function(userID, albumID, scope, options) {
+      var dom = $(scope);
 
-        options = $.jQGallery.makeValidOptionsArray(options, albumID);
-
-        var dom = $(scope);
-        $.getJSON("https://picasaweb.google.com/data/feed/api/user/" + userID + "/albumid/" + albumID  
-                + "?access=public&alt=jsonc&imgmax=" + options.imageMax + "&thumbsize=" + options.thumbsize , 'callback=?',
-          function(data){
-            for (index in data.data.items) {
-              var photo = data.data.items[index];
-              var aElement = $.jQGallery.makeAnchorElement(photo, options);
-              dom.append(aElement);
-            }
-            options.callback(dom);
-          }
-        );
-    },
-
-    /** 
-     * album teaser function 
-     * 
-     * scope: the scope to apply the method to (the element)
-     * options: an array filled with all necessary values
-     */
-    picasaTeaser : function(scope, options) {
-        var albumID = scope.attr("data-albumid");
-        var userID = scope.attr("data-userid");
-
-        if (albumID === undefined || userID === undefined)
-          return;
-
-        options = $.jQGallery.makeValidOptionsArray(options, albumID);
-
-        var dom = $(scope);
-        $.getJSON("https://picasaweb.google.com/data/feed/api/user/" + userID + "/albumid/" + albumID  
-                + "?access=public&alt=json&imgmax=" + options.imageMax + "&thumbsize=" + options.thumbsize , 'callback=?',
-          function(data){
-            var album = data.feed;
-
-            if (!album)
-              return;
-
-            // teaser image
-            var title = album.title.$t;
-            var imgElement = $.jQGallery.makeImage(album.icon.$t, title, options);
-            dom.append(imgElement);
-
-            options.callback(dom);
-          }
-        );
-    },
-
-    /** 
-     * album teaser gallery function 
-     * 
-     * scope: the scope to apply the method to (the element)
-     * options: an array filled with all necessary values
-     */
-    picasaTeaserGallery : function(scope, options) {
-        var albumID = scope.attr("data-albumid");
-        var userID = scope.attr("data-userid");
-
-        if (albumID === undefined || userID === undefined)
-          return;
-
-        options = $.jQGallery.makeValidOptionsArray(options, albumID);
-
-        var dom = $(scope);
-        $.getJSON("https://picasaweb.google.com/data/feed/api/user/" + userID + "/albumid/" + albumID  
-                + "?access=public&alt=json&imgmax=" + options.imageMax + "&thumbsize=" + options.thumbsize , 'callback=?',
-          function(data){
-            var album = data.feed;
-
-            // teaser image
-            var title = album.title.$t;
-            var photo = album.entry[0];
-
-            var aElement = $.jQGallery.makeAnchor(photo.content.src, title, title, options);
-            var imgElement = $.jQGallery.makeImage(album.icon.$t, title, options);
-            aElement.append(imgElement);
-            dom.append(aElement);
-
-            // image links
-            for (var i=1; i<album.entry.length; i++) {
-              photo = album.entry[i];
-              var aE = $.jQGallery.makeAnchor(photo.content.src, photo.summary.$t, photo.title.$t, options);
-              dom.append(aE);
-            }
-            options.callback(dom);
-          }
-        );
+      $.getJSON($.jQGallery.makePicasaAlbumEntryURL(userID, albumID, options), 'callback=?',
+        function(data){
+          var album = data.data;
+          $.jQGallery.renderTeaserImage(album, dom, options);
+        }
+      );
     },
 
     picasaTeaserGallery : function(userID, albumID, scope, options) {
@@ -221,7 +155,7 @@
 
       $.getJSON($.jQGallery.makePicasaAlbumFeedURL(userID, albumID, options), 'callback=?',
         function(data){
-          $.jQGallery.renderAlbumAnchors(data.data, dom, options);
+          $.jQGallery.renderAlbumAnchors(data.data, dom, true, options);
         }
       );
 
@@ -238,7 +172,7 @@
 
             $.getJSON($.jQGallery.makePicasaAlbumFeedURL(userID, album.id, options), 'callback=?',
               function(data){
-                $.jQGallery.renderAlbumAnchors(data.data, dom, options);
+                $.jQGallery.renderAlbumAnchors(data.data, dom, true, options);
               }
             );
 
@@ -249,10 +183,10 @@
       options.callback(dom);
     },
 
-    renderAlbumAnchors : function(album, dom, options) {
+    renderAlbumAnchors : function(album, dom, hidden, options) {
       for (idx in album.items) {
         var photo = album.items[idx];
-        $.jQGallery.renderPhotoAnchor(photo, dom, true, options);
+        $.jQGallery.renderPhotoAnchor(photo, dom, hidden, options);
       }
     },
 
