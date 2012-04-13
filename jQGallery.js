@@ -1,27 +1,32 @@
-(function($) {
+/**
+  jQGallery v0.1
+  nsn@nightspawn.com - http://nightspawn.com/tinkerings/jQGallery/
 
-  /**
-    renders a single picasa photo as a thumbnail, surrounds the image with an anchor tag that links to the full photo into
-    the element that this function is called for.
+  jQuery plugin to access picasa photos and photo feeds in a convenient fashion.
 
-    expects the element it is called for to have the following attributes:
+  functions:
+    picasaPhoto()         - renders the picasa photo's thumbnail linking to the full sized image
+    picasaAlbum()         - renders a picasaPhoto() for each photo in that album
+    picasaTeaser()        - renders the album's icon/teaser image
+    picasaTeaserGallery() - same as above, but additionally renders empty anchor tags for each photo in the album
+    picasaUserGalleries() - same as above, just for each of the user's albums
 
+  functions expect the element they are called for to have the certain attributes:
     data-albumid        : picasa album id
     data-userid         : picasa user id
     data-photoid        : picasa photo id
 
-    options:
-      thumbsize         : picasa thumbsize param, defaults to 220u, see http://code.google.com/apis/picasaweb/docs/2.0/reference.html
-      imageMax          : picasa imgmax param, defaults to d, see http://code.google.com/apis/picasaweb/docs/2.0/reference.html
-      imageStyleClass   : class attribute of the img element
-      linkStyleClass    : class attribute of the a element
-      linkRel           : rel attribute of the a element
-      callback          : gets called /w the a element as a single parameter
+  each function also takes an optional "options" hash, valid options are:
+    thumbsize         : picasa thumbsize param, defaults to 220u, see http://code.google.com/apis/picasaweb/docs/2.0/reference.html
+    imageMax          : picasa imgmax param, defaults to d, see http://code.google.com/apis/picasaweb/docs/2.0/reference.html
+    imageStyleClass   : class attribute of the img element
+    linkStyleClass    : class attribute of the a element
+    linkRel           : rel attribute of the a element
+    callback          : gets called /w the a element as a single parameter
 
-    example:
-    <div class="devscreen picasaphoto" data-userid="108363071077152262865" data-albumid="5727446456183152977" data-photoid="5727446457132933906" ></div>
+*/
+(function($) {
 
-  */
   $.fn.picasaPhoto = function(options) {
     $(this).each(function() {
       $.jQGallery.call($.jQGallery.picasaPhoto, $(this), options);
@@ -36,45 +41,19 @@
 
   $.fn.picasaTeaser = function(options) {
     $(this).each(function() {
-      scope = $(this);
-      var albumID = scope.attr("data-albumid");
-      var userID = scope.attr("data-userid");
-
-      if (albumID === undefined || userID === undefined)
-        return;
-
-      options = $.jQGallery.makeValidOptionsArray(options, albumID);
-
-      $.jQGallery.picasaTeaser(userID, albumID, scope, options);
+      $.jQGallery.call($.jQGallery.picasaTeaser, $(this), options);
     });
   };
 
   $.fn.picasaTeaserGallery = function(options) {
     $(this).each(function() {
-      scope = $(this);
-      var albumID = scope.attr("data-albumid");
-      var userID = scope.attr("data-userid");
-
-      if (albumID === undefined || userID === undefined)
-        return;
-
-      options = $.jQGallery.makeValidOptionsArray(options, albumID);
-
-      $.jQGallery.picasaTeaserGallery(userID, albumID, scope, options);
+      $.jQGallery.call($.jQGallery.picasaTeaserGallery, $(this), options);
     });
   };
 
   $.fn.picasaUserGalleries = function(options) {
     $(this).each(function() {
-      scope = $(this);
-      var userID = scope.attr("data-userid");
-
-      if (userID === undefined)
-        return;
-
-      options = $.jQGallery.makeValidOptionsArray(options, "foo");
-
-      $.jQGallery.picasaUserGalleries(userID, scope, options);
+      $.jQGallery.call($.jQGallery.picasaUserGalleries, $(this), options);
     });
   };
 
@@ -88,7 +67,6 @@
       params.photoID = scope.attr("data-photoid");
 
       options = $.jQGallery.makeValidOptionsArray(options, params.albumID);
-//  console.log("calling " + func + " params " + params.userID, params.albumID, params.photoID, options);
       func(params, scope, options);
     },
 
@@ -112,55 +90,49 @@
       options.callback(dom);
     }, 
 
-    picasaTeaser : function(userID, albumID, scope, options) {
+    picasaTeaser : function(params, scope, options) {
       var dom = $(scope);
-
-      $.getJSON($.jQGallery.makePicasaAlbumEntryURL(userID, albumID, options), 'callback=?',
+      $.getJSON($.jQGallery.makePicasaAlbumEntryURL(params.userID, params.albumID, options), 'callback=?',
         function(data){
-          var album = data.data;
-          $.jQGallery.renderTeaserImage(album, dom, options);
+          $.jQGallery.renderTeaserImage(data.data, dom, options);
         }
       );
     },
 
-    picasaTeaserGallery : function(userID, albumID, scope, options) {
+    picasaTeaserGallery : function(params, scope, options) {
       var dom = $(scope);
-
-      $.getJSON($.jQGallery.makePicasaAlbumEntryURL(userID, albumID, options), 'callback=?',
+      $.getJSON($.jQGallery.makePicasaAlbumEntryURL(params.userID, params.albumID, options), 'callback=?',
         function(data){
-          var album = data.data;
-          $.jQGallery.renderTeaserAnchor(album, dom, options);
+          $.jQGallery.renderTeaserAnchor(data.data, dom, options);
         }
       );
-
-      $.getJSON($.jQGallery.makePicasaAlbumFeedURL(userID, albumID, options), 'callback=?',
+      $.getJSON($.jQGallery.makePicasaAlbumFeedURL(params.userID, params.albumID, options), 'callback=?',
         function(data){
           $.jQGallery.renderAlbumAnchors(data.data, dom, true, options);
         }
       );
-
       options.callback(dom);
     },
 
-    picasaUserGalleries : function(userID, scope, options) {
+    picasaUserGalleries : function(params, scope, options) {
       var dom = $(scope);
-      $.getJSON($.jQGallery.makePicasaUserFeedURL(userID, options), 'callback=?',
+      $.getJSON($.jQGallery.makePicasaUserFeedURL(params.userID, options), 'callback=?',
         function(data){
           for (idx in data.data.items) {
             var album = data.data.items[idx];
             $.jQGallery.renderTeaserAnchor(album, dom, options);
 
-            $.getJSON($.jQGallery.makePicasaAlbumFeedURL(userID, album.id, options), 'callback=?',
+            $.getJSON($.jQGallery.makePicasaAlbumFeedURL(params.userID, album.id, options), 'callback=?',
               function(data){
                 $.jQGallery.renderAlbumAnchors(data.data, dom, true, options);
               }
             );
 
           }
+          options.callback(dom);
         }
       );
 
-      options.callback(dom);
     },
 
     renderAlbumAnchors : function(album, dom, hidden, options) {
@@ -220,7 +192,7 @@
     },
 
     makePicasaQueryString : function(options) {
-      return "?access=public&v=1&alt=jsonc&imgmax=" + options.imageMax + "&thumbsize=" + options.thumbsize;
+      return "?access=public&v=2&alt=jsonc&imgmax=" + options.imageMax + "&thumbsize=" + options.thumbsize;
     },
 
     makeAnchorElement : function(photo, options) {
