@@ -23,10 +23,7 @@
 
   */
   $.fn.picasaPhoto = function(options) {
-    $(this).each(function() {
-      scope = $(this);
-      $.jQGallery.picasaPhoto(scope, options);
-    });
+    $.jQGallery.call($.jQGallery.picasaPhoto, $(this), options);
   };
 
   $.fn.picasaAlbum = function(options) {
@@ -90,12 +87,25 @@
 
   /** instance function */
   $.jQGallery = { 
+    
+    call : function(func, scope, options) {
+      var params = {};
+      params.albumID = scope.attr("data-albumid");
+      params.userID = scope.attr("data-userid");
+      params.photoID = scope.attr("data-photoid");
 
-    picasaPhoto : function(userID, albumID, photoID, scope, options) {
+      options = $.jQGallery.makeValidOptionsArray(options, params.albumID);
+  console.log("calling " + func + " params " + params.userID, params.albumID, params.photoID, options.linkStyleClass);
+      func(params, scope, options);
+    },
+
+    //picasaPhoto : function(userID, albumID, photoID, scope, options) {
+    picasaPhoto : function(params, scope, options) {
       var dom = $(scope);
-      $.getJSON($.jQGallery.makePicasaPhotoEntryURL(userID, albumID, photoID, options), 'callback=?',
+      console.log($.jQGallery.makePicasaPhotoFeedURL(params.userID, params.albumID, params.photoID, options));
+      $.getJSON($.jQGallery.makePicasaPhotoEntryURL(params.userID, params.albumID, params.photoID, options), 'callback=?',
         function(data) {
-          $.jQGallery.renderPhotoAnchor(data.data, dom, options);
+          $.jQGallery.renderPhotoAnchor(data.data, dom, false, options);
         }
       );
       options.callback(dom);
@@ -191,6 +201,10 @@
     renderTeaserImage : function(album, dom, options) {
       var imgElement = $.jQGallery.makeImage(album.media.thumbnails[0], album.title, options);
       dom.append(imgElement);
+    },
+
+    makePicasaPhotoFeedURL : function(userID, albumID, photoID, options) {
+      return $.jQGallery.makePicasaBaseURL("feed", userID) + "/albumid/" + albumID + "/photoid/" + photoID + $.jQGallery.makePicasaQueryString(options);
     },
 
     makePicasaPhotoEntryURL : function(userID, albumID, photoID, options) {
