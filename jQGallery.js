@@ -13,8 +13,8 @@
 
   functions expect the element they are called for to have the certain attributes:
     data-albumid        : picasa album id
-    data-userid         : picasa user id
-    data-photoid        : picasa photo id
+    data-userid         : picasa user id/twitpic username
+    data-photoid        : picasa photo id/twitpic media id
 
   each function also takes an optional "options" hash, valid options are:
     thumbsize         : picasa thumbsize param, defaults to 220u, see http://code.google.com/apis/picasaweb/docs/2.0/reference.html
@@ -22,6 +22,7 @@
     imageStyleClass   : class attribute of the img element
     linkStyleClass    : class attribute of the a element
     linkRel           : rel attribute of the a element
+    twthumbsize       : twitpic thumbsize, defaults to "thumb", see http://dev.twitpic.com/docs/thumbnails/
     callback          : gets called /w the a element as a single parameter
 
 */
@@ -57,16 +58,31 @@
     });
   };
 
+  $.fn.twitpicUserGallery = function(options) {
+    $(this).each(function() {
+      $.jQGallery.call($.jQGallery.twitpicUserGallery, $(this), options, {"startpage" : 1});
+    });
+  };
+
+  $.fn.twitpicMedia = function(options) {
+    $(this).each(function() {
+      $.jQGallery.call($.jQGallery.twitpicMedia, $(this), options);
+    });
+  };
+
   /** instance function */
   $.jQGallery = { 
     
-    call : function(func, scope, options) {
+    call : function(func, scope, options, additional) {
       var params = {};
       params.albumID = scope.attr("data-albumid");
       params.userID = scope.attr("data-userid");
       params.photoID = scope.attr("data-photoid");
 
       options = $.jQGallery.makeValidOptionsArray(options, params.albumID);
+      for (key in additional) {
+        options[key] = additional[key];
+      }
       func(params, scope, options);
     },
 
@@ -132,7 +148,41 @@
           options.callback(dom);
         }
       );
+    },
 
+    twitpicMedia : function(params, scope, options) {
+      var dom = $(scope);
+      $.getJSON($.jQGallery.makeTwitpicMediaURL(params.photoID), 'callback=?', function(data) {
+        $.jQGallery.renderTwitpicAnchor(data, dom, options); 
+      });
+    },
+
+    twitpicUserGallery : function(params, scope, options) {
+      var dom = $(scope);
+      $.getJSON($.jQGallery.makeTwitpicUserURL(params.userID, options.startpage), 'callback=?', function(data) {
+          for (idx in data.images) {
+            $.jQGallery.renderTwitpicAnchor(data.images[idx], dom, options);
+          }
+          if (options.startpage * 20 < data.photo_count) {
+            options.startpage = options.startpage+1;
+            $.jQGallery.twitpicUserGallery(params, scope, options);
+          }
+        }
+      );
+      options.callback(dom);
+    },
+
+    renderTwitpicAnchor : function(media, dom, options) {
+      var imageURL = "http://twitpic.com/" + media.short_id;
+      var aElement = $.jQGallery.makeAnchor(imageURL, media.message, media.message, options);
+      $.jQGallery.renderTwitpicMedia(media, aElement, options);
+      dom.append(aElement);
+    },
+
+    renderTwitpicMedia : function(media, dom, options) {
+      var thumbnailURL = "http://twitpic.com/show/" + options.twthumbsize + "/" + media.short_id;
+      var imgElement = $.jQGallery.makeImage(thumbnailURL, media.message, options);
+      dom.append(imgElement);
     },
 
     renderAlbumAnchors : function(album, dom, hidden, options) {
@@ -165,6 +215,14 @@
     renderTeaserImage : function(album, dom, options) {
       var imgElement = $.jQGallery.makeImage(album.media.thumbnails[0], album.title, options);
       dom.append(imgElement);
+    },
+
+    makeTwitpicMediaURL : function(id) {
+      return "http://api.twitpic.com/2/media/show.jsonp?id=" + id;
+    },
+
+    makeTwitpicUserURL : function(userID, page) {
+      return "http://api.twitpic.com/2/users/show.jsonp?username=" + userID + "&page=" + page;
     },
 
     makePicasaPhotoFeedURL : function(userID, albumID, photoID, options) {
@@ -235,6 +293,8 @@
 
       if (options.thumbsize == undefined)
         options.thumbsize = "220u";
+      if (options.twthumbsize == undefined)
+        options.twthumbsize = "thumb";
       if (options.imageMax == undefined) 
         options.imageMax = "d";
       if (options.linkRel == undefined) 

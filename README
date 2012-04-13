@@ -6,6 +6,10 @@ see example.html and jQGallery.js for help on how to use
 
 Changelog:
 
+v0.2 - twitpic support
+----------------------
+added twitpic media and user galleries
+
 v0.1 - initial release
 ----------------------
 supports picasa photos, web albums and album teasers

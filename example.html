@@ -12,6 +12,7 @@
     <li><a href="#c1">Picasa: single photos</a></li>
     <li><a href="#c2">Picasa: whole albums</a></li>
     <li><a href="#c3">Picasa: album teasers</a></li>
+    <li><a href="#c4">twitpic</a></li>
   </ol>
 
   jQGallery generally only supports public albums, but why not make them public if you are going to share them anyways?<br/>
@@ -51,8 +52,8 @@
   <div class="album2" data-userid="108363071077152262865" data-albumid="5679796410312675457"></div>
 
   <!-- picasa album teasers section -->
-  <h2><a name="c2">Picasa: album teasers</a></h2>
-  Eache Picasa photo album has a teaser image, and jQGallery's <strong>picasaTeaser()</strong> function provides an easy way to access it: 
+  <h2><a name="c3">Picasa: album teasers</a></h2>
+  Each Picasa photo album has a teaser image, and jQGallery's <strong>picasaTeaser()</strong> function provides an easy way to access it: 
   <script src="https://gist.github.com/2368984.js"> </script>
   <span class="teaserimage" data-userid="108363071077152262865" data-albumid="5684490602047224481"></span><br/>
   ... and just because a common use-case for such an image is to create a gallery from it, jQGallery has the <strong>picasaTeaserGallery()</strong> function.
@@ -64,6 +65,15 @@
   <script src="https://gist.github.com/2376561.js"> </script>
   <span class="usergalleries" data-userid="108363071077152262865"></span>
 
+  <!-- twitpic section -->
+  <h2><a name="c3">Twitpic</a></h2>
+  Twitpic's api is kinda limited, but at least you can use the <strong>twitpicMedia()</strong> function to display a single image:
+  <script src="https://gist.github.com/2378331.js"> </script>
+  <div class="twitpicimage" data-photoid="7ej9qe"></div>
+  ... and the <strong>twitpicUserGallery()</strong> function to display a user's gallery. If you want to create a fancybox gallery
+  remember to set the type to "iframe", as twitpic's EULA demands that you link to the image page instead of the image directly:
+  <script src="https://gist.github.com/2378357.js"> </script>
+  <div class="twitpicuser" data-userid="pneis"></div>
 
   <!-- load jQuery and plugin scripts -->
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -115,7 +125,17 @@
           }
         }
       );
+      // render twitpic media
+      $(".twitpicimage").twitpicMedia();
 
+      $(".twitpicuser").twitpicUserGallery({
+        "linkStyleClass" : "gallery5",
+        "twthumbsize" : "mini",
+        "linkRel" : "twitpic",
+        "callback" : function (elements) {
+          $(".gallery5").fancybox({"type" : "iframe"});
+        }
+      });
 
     });
   </script>
