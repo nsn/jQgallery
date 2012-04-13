@@ -54,7 +54,7 @@
 
       options = $.jQGallery.makeValidOptionsArray(options, albumID);
 
-      $.jQGallery.foopicasaTeaserGallery(userID, albumID, scope, options);
+      $.jQGallery.picasaTeaserGallery(userID, albumID, scope, options);
     });
   };
 
@@ -62,9 +62,12 @@
     $(this).each(function() {
       scope = $(this);
       var userID = scope.attr("data-userid");
+
       if (userID === undefined)
         return;
+
       options = $.jQGallery.makeValidOptionsArray(options, "foo");
+
       $.jQGallery.picasaUserGalleries(userID, scope, options);
     });
   };
@@ -206,7 +209,7 @@
         );
     },
 
-    foopicasaTeaserGallery : function(userID, albumID, scope, options) {
+    picasaTeaserGallery : function(userID, albumID, scope, options) {
       var dom = $(scope);
 
       $.getJSON($.jQGallery.makePicasaAlbumEntryURL(userID, albumID, options), 'callback=?',
@@ -221,6 +224,8 @@
           $.jQGallery.renderAlbumAnchors(data.data, dom, options);
         }
       );
+
+      options.callback(dom);
     },
 
     picasaUserGalleries : function(userID, scope, options) {
@@ -230,9 +235,18 @@
           for (idx in data.data.items) {
             var album = data.data.items[idx];
             $.jQGallery.renderTeaserAnchor(album, dom, options);
+
+            $.getJSON($.jQGallery.makePicasaAlbumFeedURL(userID, album.id, options), 'callback=?',
+              function(data){
+                $.jQGallery.renderAlbumAnchors(data.data, dom, options);
+              }
+            );
+
           }
         }
       );
+
+      options.callback(dom);
     },
 
     renderAlbumAnchors : function(album, dom, options) {
