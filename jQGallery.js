@@ -32,7 +32,6 @@
   $.fn.picasaAlbum = function(options) {
     $(this).each(function() {
       scope = $(this);
-      //$.jQGallery.picasaAlbum(scope, options);
       var albumID = scope.attr("data-albumid");
       var userID = scope.attr("data-userid");
 
@@ -92,34 +91,14 @@
   /** instance function */
   $.jQGallery = { 
 
-    /** 
-     * single photo function 
-     * 
-     * scope: the scope to apply the method to (the element)
-     * options: an array filled with all necessary values
-     */
-    picasaPhoto : function(scope, options) {
-        var albumID = scope.attr("data-albumid");
-        var userID = scope.attr("data-userid");
-        var photoID = scope.attr("data-photoid");
-
-        if (albumID === undefined || userID === undefined || photoID === undefined)
-          return;
-
-        options = $.jQGallery.makeValidOptionsArray(options, albumID);
-
-        var dom = $(scope);
-        $.getJSON("https://picasaweb.google.com/data/feed/api/user/" + userID + "/albumid/" + albumID + "/photoid/" + photoID 
-                + "?access=public&alt=jsonc&imgmax=" + options.imageMax + "&thumbsize=" + options.thumbsize , 'callback=?',
-          function(data){
-
-            var photo = data.data;
-            var aElement = $.jQGallery.makeAnchorElement(photo, options);
-            dom.append(aElement);
-            options.callback(aElement);
-
-          }
-        );
+    picasaPhoto : function(userID, albumID, photoID, scope, options) {
+      var dom = $(scope);
+      $.getJSON($.jQGallery.makePicasaPhotoEntryURL(userID, albumID, photoID, options), 'callback=?',
+        function(data) {
+          $.jQGallery.renderPhotoAnchor(data.data, dom, options);
+        }
+      );
+      options.callback(dom);
     },
 
     picasaAlbum : function(userID, albumID, scope, options) {
@@ -212,6 +191,10 @@
     renderTeaserImage : function(album, dom, options) {
       var imgElement = $.jQGallery.makeImage(album.media.thumbnails[0], album.title, options);
       dom.append(imgElement);
+    },
+
+    makePicasaPhotoEntryURL : function(userID, albumID, photoID, options) {
+      return $.jQGallery.makePicasaBaseURL("entry", userID) + "/albumid/" + albumID + "/photoid/" + photoID + $.jQGallery.makePicasaQueryString(options);
     },
 
     makePicasaAlbumFeedURL : function(userID, albumID, options) {
